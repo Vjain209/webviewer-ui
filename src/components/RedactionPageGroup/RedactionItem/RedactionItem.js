@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Icon from 'src/components/Icon';
 import getLatestActivityDate from 'helpers/getLatestActivityDate';
@@ -8,6 +8,7 @@ import './RedactionItem.scss';
 import RedactionTextPreview from 'components/RedactionTextPreview';
 import classNames from 'classnames';
 import { redactionTypeMap } from 'constants/redactionTypes';
+import CustomRedactionContext from '../../RedactionPanel/CustomRedactionContext'
 
 const RedactionItem = (props) => {
   const {
@@ -30,7 +31,8 @@ const RedactionItem = (props) => {
   const {
     label,
     icon = 'icon-form-field-text', // Default icon if none provided
-    redactionType
+    redactionType,
+    markChecked
   } = annotation;
 
   let redactionPreview;
@@ -57,8 +59,10 @@ const RedactionItem = (props) => {
       onRedactionItemSelection();
     }
   };
+  const onChangedCheckedItems = useContext(CustomRedactionContext)
 
-  return (
+  return <div className='d-flex'>
+    <input type='checkbox' checked={markChecked} onChange={(e) => onChangedCheckedItems(annotation.Id, e.target.checked)} />
     <div role="listitem" className={className} onClick={onRedactionItemSelection} onKeyUp={onKeyUp} tabIndex={0}>
       <div className="redaction-icon-container">
         <Icon glyph={icon} color={iconColor} />
@@ -78,7 +82,7 @@ const RedactionItem = (props) => {
         ariaLabel={t('action.delete')}
       />
     </div>
-  );
+  </div>;
 };
 
 export default React.memo(RedactionItem);

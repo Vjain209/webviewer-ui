@@ -38,6 +38,11 @@ const RedactionItemContainer = (props) => {
   const onRedactionItemDelete = useCallback(() => {
     core.deleteAnnotations([annotation]);
   }, [annotation]);
+  const [isChecked, setIsChecked] = React.useState(false);
+
+  const onCheckChange = (e) => {
+    setIsChecked(e.target.checked)
+  }
 
   return (
     <RedactionItem
@@ -50,6 +55,8 @@ const RedactionItemContainer = (props) => {
       onRedactionItemDelete={onRedactionItemDelete}
       onRedactionItemSelection={onRedactionItemSelection}
       isSelected={selectedRedactionItemId === annotation.Id}
+      checked={isChecked}
+      onCheckChange={onCheckChange}
     />
   );
 };

@@ -53,6 +53,9 @@ input, button, label, textarea, form, select, #app {
   }
   font-family: 'Lato', sans-serif;
 }
+.d-flex {
+  display: flex;
+}
 
 input, textarea, select {
   border: 1px solid var(--border);
@@ -64,6 +67,12 @@ input, textarea, select {
     outline: none;
     border: 1px solid var(--focus-border);
   }
+}
+
+.redaction-commit-category {
+  display: block;
+  padding: 0.2rem 0.6rem;
+  margin: 0.4rem 0;
 }
 
 .App {

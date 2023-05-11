@@ -30,18 +30,20 @@ app.use('/i18n', express.static(path.resolve(__dirname, 'i18n')));
 app.use('/assets', express.static(path.resolve(__dirname, 'assets')));
 app.use('/core', express.static(path.resolve(__dirname, 'lib/core')));
 
-app.get('/', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'src/index.html'));
-});
 
 const sampleURL = encodeURIComponent(JSON.stringify('https://pdftron.s3.amazonaws.com/downloads/pl/demo-annotated.pdf'));
 
+const fullAPI = '&pdfnet=1';
+const enableRedaction = '&enableRedaction=1';
 app.get('/sample-url', (req, res) => {
-
+  
   res.redirect(
-    `/#d=${sampleURL}&a=1`,
-  );
-});
+    `/#d=${sampleURL}&a=1${fullAPI}${enableRedaction}`,
+    );
+  });
+  app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'src/index.html'));
+  });
 
 app.listen(3000, '0.0.0.0', err => {
   if (err) {
