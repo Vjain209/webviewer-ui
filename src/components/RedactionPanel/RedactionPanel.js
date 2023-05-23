@@ -9,6 +9,7 @@ import CustomRedactionContext from './CustomRedactionContext'
 import core from 'core'
 import './RedactionPanel.scss';
 import RedactionPageGroup from '../RedactionPageGroup';
+import { connect } from 'react-redux';
 
 const RedactionPanel = (props) => {
   const {
@@ -16,6 +17,7 @@ const RedactionPanel = (props) => {
     applyAllRedactions,
     deleteAllRedactionAnnotations,
     redactionTypesDictionary,
+    style
   } = props;
 
   const { t } = useTranslation();
@@ -123,6 +125,34 @@ const RedactionPanel = (props) => {
           }
           core.getAnnotationManager().trigger('commitClick', { annotations });
         }} disabled={!canShowCommit} className='redaction-commit-category' style={{ background: '#000', color: '#fff' }}>Add Category</button>}
+
+        <button disabled={!canShowCommit} style={{ background: '#000', color: '#fff' }} className='redaction-commit-category' onClick={() => {
+          for (let page in redactionPageMap) {
+            const currentPage = redactionPageMap[page]
+            const cloned = { ...redactionPageMap };
+            for (let i = 0; i < currentPage.length; i++) {
+              if (currentPage[i].markChecked === true) {
+                const { FillColor, OverlayText, TextColor, StrokeColor, Font, FontSize, Opacity, StrokeThickness, TextAlign } = style
+                cloned[page][i].FillDisplayColor = FillColor;
+                cloned[page][i].OverlayText = OverlayText;
+                cloned[page][i].TextColor = TextColor;
+                cloned[page][i].StrokeColor = StrokeColor;
+                cloned[page][i].Font = Font;
+                cloned[page][i].FontSize = FontSize;
+                cloned[page][i].Opacity = Opacity;
+                cloned[page][i].StrokeThickness = StrokeThickness;
+                cloned[page][i].TextAlign = TextAlign;
+
+                console.log(style)
+                // cloned[page][i] = {...cloned[page][i], FillColor, OverlayText, TextColor, StrokeColor}
+              }
+            }
+            setRedactionPageMap(cloned)
+          }
+        }}>
+          Update style
+        </button>
+
       </div>
       {redactionPageNumbers.length > 0 ? renderRedactionPageGroups() : noRedactionAnnotations}
       <div className="redaction-panel-controls">
@@ -147,4 +177,9 @@ const RedactionPanel = (props) => {
   );
 };
 
-export default RedactionPanel;
+
+const mapStateToProps = (state) => ({
+  style: state.viewer.activeToolStyles
+});
+
+export default connect(mapStateToProps)(RedactionPanel);
