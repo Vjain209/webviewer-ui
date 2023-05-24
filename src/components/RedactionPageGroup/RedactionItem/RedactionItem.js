@@ -61,7 +61,7 @@ const RedactionItem = (props) => {
   };
   const onChangedCheckedItems = useContext(CustomRedactionContext)
 
-  return <div className='d-flex'>
+  return <div className='d-flex' id={`annotation-${annotation.Id}`}>
     <input type='checkbox' checked={markChecked} onChange={(e) => onChangedCheckedItems(annotation.Id, e.target.checked)} />
     <div role="listitem" className={className} onClick={onRedactionItemSelection} onKeyUp={onKeyUp} tabIndex={0}>
       <div className="redaction-icon-container">

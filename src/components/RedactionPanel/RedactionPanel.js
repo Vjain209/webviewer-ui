@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo } from 'react';
+import React, { useEffect, useState, useContext, useMemo , useRef} from 'react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import Icon from 'components/Icon';
@@ -23,7 +23,105 @@ const RedactionPanel = (props) => {
   const [redactionPageNumbers, setRedactionPageNumbers] = useState([]);
   // The following prop is needed only for the tests to actually render a list of results
   // it only is ever injected in the tests
-  const { isTestMode } = useContext(RedactionPanelContext);
+  const { isTestMode, selectedRedactionItemId, setSelectedRedactionItemId } = useContext(RedactionPanelContext);
+
+  const refid = useRef(null);
+  const prevPage = useRef(null)
+  const scrollIntoViewById = (id) => {
+    if (id) {
+      const el = document.querySelector('#annotation-' + id);
+      if(el) {
+        el.scrollIntoView({behavior: 'smooth'});
+      }
+    }
+  }
+  useEffect(() => {
+    const onKeyDownHandler = (event) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (refid.current.selectedRedactionItemId) {
+          for (let page in refid.current.redactionPageMap) {
+            const currentPage = refid.current.redactionPageMap[page]
+            for (let i = 0; i < currentPage.length; i++) {
+              if (currentPage[i].Id === refid.current.selectedRedactionItemId) {
+                // check if we've another item after this one
+                if (currentPage[i - 1]) {
+                  const currentAnnotation = currentPage[i - 1]
+                  core.deselectAllAnnotations();
+                  core.selectAnnotation(currentAnnotation);
+                  core.jumpToAnnotation(currentAnnotation);
+                  setSelectedRedactionItemId(currentAnnotation.Id);
+                  scrollIntoViewById(currentAnnotation.Id)
+                  break;
+                } else if (prevPage.current) {
+                  if (refid.current.redactionPageMap[prevPage.current]) {
+                    const currentAnnotation = refid.current.redactionPageMap[prevPage.current][refid.current.redactionPageMap[prevPage.current].length - 1]
+                    core.deselectAllAnnotations();
+                    core.selectAnnotation(currentAnnotation);
+                    core.jumpToAnnotation(currentAnnotation);
+                    setSelectedRedactionItemId(currentAnnotation.Id)
+                    scrollIntoViewById(currentAnnotation.Id)
+                    break;
+                  }
+                }
+              }
+            }
+            prevPage.current = page;
+          }
+        }
+      }
+      else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        if (refid.current.selectedRedactionItemId) {
+          for (let page in refid.current.redactionPageMap) {
+            const currentPage = refid.current.redactionPageMap[page]
+            for (let i = 0; i < currentPage.length; i++) {
+              if (currentPage[i].Id === refid.current.selectedRedactionItemId) {
+                // check if we've another item after this one
+                if (currentPage[i + 1]) {
+                  const currentAnnotation = currentPage[i + 1]
+                  core.deselectAllAnnotations();
+                  core.selectAnnotation(currentAnnotation);
+                  core.jumpToAnnotation(currentAnnotation);
+                  setSelectedRedactionItemId(currentAnnotation.Id)
+                  scrollIntoViewById(currentAnnotation.Id)
+                  break;
+                }
+                else {
+                  const keys = Object.keys(refid.current.redactionPageMap);
+                  const theOne = keys.findIndex(val => val === page);
+                  if (theOne !== -1) {
+                    const needed = refid.current.redactionPageMap[keys[theOne + 1]];
+                    if (needed) {
+                      const id = needed[0].Id
+                      core.deselectAllAnnotations();
+                      core.selectAnnotation(needed[0]);
+                      core.jumpToAnnotation(needed[0]);
+                      setSelectedRedactionItemId(id)
+                      scrollIntoViewById(id)
+                      return
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // add listener
+    window.addEventListener('keydown', onKeyDownHandler, {
+      capture: true,
+      passive: false
+    })
+    // prevent memory leak
+    return () => {
+      window.removeEventListener('keydown', onKeyDownHandler);
+    }
+  }, [])
+  useEffect(() => {
+    refid.current = { selectedRedactionItemId, redactionPageMap };
+  }, [selectedRedactionItemId, redactionPageMap])
 
   useEffect(() => {
     const redactionPageMap = {};
